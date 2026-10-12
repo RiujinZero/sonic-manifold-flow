@@ -1,0 +1,133 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "manifold-flow"
+version = "0.1.0"
+description = "A geometry-first sparse attractor memory research prototype"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+  "torch>=2.2",
+  "tomli>=2.0; python_version < '3.11'",
+]
+
+[project.scripts]
+manifoldflow-phase-a = "manifoldflow.experiments.phase_a:main"
+manifoldflow-phase-a-imagenet = "manifoldflow.experiments.phase_a_imagenet:main"
+manifoldflow-imagenet-stream-extract = "manifoldflow.experiments.imagenet_stream_extract:main"
+manifoldflow-imagenet-local-train-extract = "manifoldflow.experiments.imagenet_local_train_extract:main"
+manifoldflow-imagenet-scale-evaluation = "manifoldflow.experiments.imagenet_scale_evaluation:main"
+manifoldflow-basin-traversal-probe = "manifoldflow.experiments.basin_traversal_probe:main"
+manifoldflow-imagenet-validation-eval = "manifoldflow.experiments.imagenet_validation_eval:main"
+manifoldflow-init-bank = "manifoldflow.experiments.initialize_bank:main"
+manifoldflow-calibrate-decoder = "manifoldflow.experiments.calibrate_decoder:main"
+manifoldflow-flow-ablation = "manifoldflow.experiments.flow_ablation:main"
+manifoldflow-aggregate-flow = "manifoldflow.experiments.aggregate_flow:main"
+manifoldflow-baseline-ablation = "manifoldflow.experiments.baseline_ablation:main"
+manifoldflow-calibrate-neutral = "manifoldflow.experiments.calibrate_neutral_decoder:main"
+manifoldflow-select-baseline = "manifoldflow.experiments.select_baseline:main"
+manifoldflow-online-ablation = "manifoldflow.experiments.online_ablation:main"
+manifoldflow-aggregate-continual = "manifoldflow.experiments.aggregate_continual:main"
+manifoldflow-ann-benchmark = "manifoldflow.experiments.ann_benchmark:main"
+manifoldflow-ann-scale-benchmark = "manifoldflow.experiments.ann_scale_benchmark:main"
+manifoldflow-scale-benchmark = "manifoldflow.experiments.manifoldflow_scale_benchmark:main"
+manifoldflow-ann-scale-sweep = "manifoldflow.experiments.ann_scale_sweep:main"
+manifoldflow-qwen-deterministic-replay = "manifoldflow.experiments.qwen_deterministic_replay:main"
+manifoldflow-qwen-representation-sweep = "manifoldflow.experiments.qwen_representation_sweep:main"
+manifoldflow-qwen-static-bank-probe = "manifoldflow.experiments.qwen_static_bank_probe:main"
+manifoldflow-qwen-persistent-context-probe = "manifoldflow.experiments.qwen_persistent_context_probe:main"
+manifoldflow-qwen-hard-negative-probe = "manifoldflow.experiments.qwen_hard_negative_probe:main"
+manifoldflow-qwen-adaptive-gate-probe = "manifoldflow.experiments.qwen_adaptive_gate_probe:main"
+manifoldflow-qwen-write-lifecycle-probe = "manifoldflow.experiments.qwen_write_lifecycle_probe:main"
+manifoldflow-consolidation-scale-benchmark = "manifoldflow.experiments.consolidation_scale_benchmark:main"
+manifoldflow-sonic-deterministic-replay = "manifoldflow.experiments.sonic_deterministic_replay:main"
+manifoldflow-sonic-representation-sweep = "manifoldflow.experiments.sonic_representation_sweep:main"
+manifoldflow-sonic-static-bank-probe = "manifoldflow.experiments.sonic_static_bank_probe:main"
+manifoldflow-sonic-persistent-context-probe = "manifoldflow.experiments.sonic_persistent_context_probe:main"
+manifoldflow-sonic-memory-training-probe = "manifoldflow.experiments.sonic_memory_training_probe:main"
+manifoldflow-sonic-pretrained-memory-probe = "manifoldflow.experiments.sonic_pretrained_memory_probe:main"
+manifoldflow-sonic-pretrained-memory-discrimination-probe = "manifoldflow.experiments.sonic_pretrained_memory_discrimination_probe:main"
+manifoldflow-sonic-pretrained-memory-learned-retrieval-probe = "manifoldflow.experiments.sonic_pretrained_memory_learned_retrieval_probe:main"
+manifoldflow-sonic-finetune-stability-probe = "manifoldflow.experiments.sonic_finetune_stability_probe:main"
+manifoldflow-sonic-real-corpus-memory-probe = "manifoldflow.experiments.sonic_real_corpus_memory_probe:main"
+manifoldflow-sonic-distractor-generator-memory-probe = "manifoldflow.experiments.sonic_distractor_generator_memory_probe:main"
+manifoldflow-sonic-distractor-generator-per-fact-memory-probe = "manifoldflow.experiments.sonic_distractor_generator_per_fact_memory_probe:main"
+manifoldflow-sonic-correction-memory-probe = "manifoldflow.experiments.sonic_correction_memory_probe:main"
+manifoldflow-sonic-session-correction-probe = "manifoldflow.experiments.sonic_session_correction_probe:main"
+manifoldflow-sonic-batch-lane-persistence-probe = "manifoldflow.experiments.sonic_batch_lane_persistence_probe:main"
+manifoldflow-sonic-vanilla-correction-baseline = "manifoldflow.experiments.sonic_vanilla_correction_baseline:main"
+manifoldflow-sonic-throughput-benchmark = "manifoldflow.experiments.sonic_throughput_benchmark:main"
+manifoldflow-sonic-reverse-query-probe = "manifoldflow.experiments.sonic_reverse_query_probe:main"
+manifoldflow-sonic-noun-target-probe = "manifoldflow.experiments.sonic_noun_target_probe:main"
+manifoldflow-world-demo = "manifoldflow.world_app:main"
+manifoldflow-world-simulate = "manifoldflow.experiments.world_simulate:main"
+manifoldflow-world-train-oracle = "manifoldflow.experiments.world_train_oracle:main"
+manifoldflow-world-evaluate-oracle = "manifoldflow.experiments.world_evaluate_oracle:main"
+manifoldflow-world-train-projector = "manifoldflow.experiments.world_train_projector:main"
+manifoldflow-world-export-yolox = "manifoldflow.experiments.world_export_yolox:main"
+manifoldflow-world-detect-image = "manifoldflow.experiments.world_detect_image:main"
+manifoldflow-world-process-image = "manifoldflow.experiments.world_process_image:main"
+manifoldflow-world-replay-video = "manifoldflow.experiments.world_replay_video:main"
+manifoldflow-world-export-video-dataset = "manifoldflow.experiments.world_export_video_dataset:main"
+manifoldflow-world-datasets = "manifoldflow.experiments.world_external_datasets:main"
+manifoldflow-world-mix-corpus = "manifoldflow.experiments.world_mix_corpus:main"
+manifoldflow-world-train-recall-port = "manifoldflow.experiments.world_train_recall_port:main"
+
+[project.optional-dependencies]
+dev = [
+  "numpy>=1.26",
+  "pytest>=8.0",
+  "ruff>=0.6",
+]
+vision = [
+  "torchvision>=0.17",
+]
+stream = [
+  "datasets>=2.19",
+]
+ann = [
+  "hnswlib>=0.8",
+]
+qwen = [
+  "transformers>=4.57",
+  "accelerate>=0.30",
+]
+world = [
+  "torch>=2.11,<2.12",
+  "transformers>=4.55,<6",
+  "accelerate>=1.0",
+  "peft>=0.17",
+  "torchvision>=0.26,<0.27",
+  "numpy>=1.26",
+  "pillow>=11",
+  "opencv-python-headless>=4.10",
+  "fastapi>=0.116",
+  "uvicorn[standard]>=0.35",
+  "python-multipart>=0.0.20",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/manifoldflow", "src/gator_linear"]
+
+[tool.pytest.ini_options]
+addopts = "-q"
+testpaths = ["tests"]
+pythonpath = ["src"]
+
+[tool.ruff]
+line-length = 88
+# Vendored verbatim from GTR-sonic-ssm (src/manifoldflow/sonic_ssm.py's own
+# docstring) - held to upstream's style, not this project's, so a re-copy
+# stays a clean diff.
+extend-exclude = [
+  "src/manifoldflow/sonic_ssm.py",
+  "src/manifoldflow/compute.py",
+  "src/gator_linear",
+  "vendor",
+]
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]

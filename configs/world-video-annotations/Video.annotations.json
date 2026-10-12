@@ -1,0 +1,98 @@
+{
+  "schema_version": 1,
+  "split": "train",
+  "video": "Video.mov",
+  "scenario": "mint-cup-ball-shuffle",
+  "notes": "Cup-color binding test: after the first reveal, the system must bind the ball to the mint cup, preserve that relation through the shuffle, and report the mint cup's final position. The ball is not annotated before its first reveal because the system has no prior evidence that it exists.",
+  "checkpoints": [
+    {
+      "timestamp_s": 1.0,
+      "entities": [
+        {"id": "gray-cup", "class": "cup", "label": "gray", "zone": "left", "visibility": "visible", "box": [0.14, 0.34, 0.28, 0.73]},
+        {"id": "mint-cup", "class": "cup", "label": "mint", "zone": "center", "visibility": "visible", "box": [0.42, 0.34, 0.58, 0.73]},
+        {"id": "pink-cup", "class": "cup", "label": "pink", "zone": "right", "visibility": "visible", "box": [0.70, 0.34, 0.86, 0.73]}
+      ],
+      "relations": []
+    },
+    {
+      "timestamp_s": 5.0,
+      "entities": [
+        {"id": "gray-cup", "class": "cup", "label": "gray", "zone": "left", "visibility": "visible", "box": [0.14, 0.34, 0.28, 0.73]},
+        {"id": "mint-cup", "class": "cup", "label": "mint", "zone": "center", "visibility": "missing"},
+        {"id": "pink-cup", "class": "cup", "label": "pink", "zone": "right", "visibility": "visible", "box": [0.70, 0.34, 0.86, 0.73]},
+        {"id": "ball", "class": "ball", "label": "white", "zone": "center", "visibility": "visible", "box": [0.48, 0.64, 0.54, 0.73]}
+      ],
+      "relations": []
+    },
+    {
+      "timestamp_s": 8.0,
+      "entities": [
+        {"id": "gray-cup", "class": "cup", "label": "gray", "zone": "left", "visibility": "visible", "box": [0.14, 0.34, 0.28, 0.73]},
+        {"id": "mint-cup", "class": "cup", "label": "mint", "zone": "center", "visibility": "visible", "box": [0.42, 0.34, 0.58, 0.73]},
+        {"id": "pink-cup", "class": "cup", "label": "pink", "zone": "right", "visibility": "visible", "box": [0.70, 0.34, 0.86, 0.73]},
+        {"id": "ball", "class": "ball", "label": "white", "zone": "center", "visibility": "contained"}
+      ],
+      "relations": [{"subject": "ball", "relation": "contained_by", "target": "mint-cup"}]
+    },
+    {
+      "timestamp_s": 15.5,
+      "entities": [
+        {"id": "pink-cup", "class": "cup", "label": "pink", "zone": "left", "visibility": "visible", "box": [0.14, 0.34, 0.28, 0.73]},
+        {"id": "gray-cup", "class": "cup", "label": "gray", "zone": "center", "visibility": "visible", "box": [0.42, 0.34, 0.58, 0.73]},
+        {"id": "mint-cup", "class": "cup", "label": "mint", "zone": "right", "visibility": "visible", "box": [0.70, 0.34, 0.86, 0.73]},
+        {"id": "ball", "class": "ball", "label": "white", "zone": "right", "visibility": "contained"}
+      ],
+      "relations": [{"subject": "ball", "relation": "contained_by", "target": "mint-cup"}]
+    }
+  ],
+  "expected_events": [
+    {"type": "appeared", "entity": "ball", "start_s": 3.0, "end_s": 5.5},
+    {"type": "contained_by", "entity": "ball", "related": "mint-cup", "start_s": 6.5, "end_s": 9.0}
+  ],
+  "questions": [
+    {"id": "ball-after-cover", "timestamp_s": 8.5, "question": "Where is the ball?", "expected_answers": ["The ball is under the mint cup."]},
+    {"id": "ball-after-shuffle", "timestamp_s": 16.0, "question": "Where is the ball?", "expected_answers": ["The ball is under the mint cup."]}
+  ],
+  "training_frames": [
+    {"timestamp_s": 0.0, "entities": [
+      {"id": "gray-cup", "class": "cup", "visibility": "visible", "box": [0.14, 0.34, 0.28, 0.73]},
+      {"id": "mint-cup", "class": "cup", "visibility": "visible", "box": [0.42, 0.34, 0.58, 0.73]},
+      {"id": "pink-cup", "class": "cup", "visibility": "visible", "box": [0.70, 0.34, 0.86, 0.73]}
+    ]},
+    {"timestamp_s": 2.0, "entities": [
+      {"id": "gray-cup", "class": "cup", "visibility": "visible", "box": [0.14, 0.34, 0.28, 0.73]},
+      {"id": "mint-cup", "class": "cup", "visibility": "visible", "box": [0.42, 0.34, 0.58, 0.73]},
+      {"id": "pink-cup", "class": "cup", "visibility": "visible", "box": [0.70, 0.34, 0.86, 0.73]}
+    ]},
+    {"timestamp_s": 4.0, "entities": [
+      {"id": "gray-cup", "class": "cup", "visibility": "visible", "box": [0.14, 0.34, 0.28, 0.73]},
+      {"id": "pink-cup", "class": "cup", "visibility": "visible", "box": [0.70, 0.34, 0.86, 0.73]},
+      {"id": "ball", "class": "ball", "visibility": "visible", "box": [0.48, 0.64, 0.54, 0.73]}
+    ]},
+    {"timestamp_s": 4.5, "entities": [
+      {"id": "gray-cup", "class": "cup", "visibility": "visible", "box": [0.14, 0.34, 0.28, 0.73]},
+      {"id": "pink-cup", "class": "cup", "visibility": "visible", "box": [0.70, 0.34, 0.86, 0.73]},
+      {"id": "ball", "class": "ball", "visibility": "visible", "box": [0.48, 0.64, 0.54, 0.73]}
+    ]},
+    {"timestamp_s": 5.5, "entities": [
+      {"id": "gray-cup", "class": "cup", "visibility": "visible", "box": [0.14, 0.34, 0.28, 0.73]},
+      {"id": "pink-cup", "class": "cup", "visibility": "visible", "box": [0.70, 0.34, 0.86, 0.73]},
+      {"id": "ball", "class": "ball", "visibility": "visible", "box": [0.48, 0.64, 0.54, 0.73]}
+    ]},
+    {"timestamp_s": 6.0, "entities": [
+      {"id": "gray-cup", "class": "cup", "visibility": "visible", "box": [0.14, 0.34, 0.28, 0.73]},
+      {"id": "pink-cup", "class": "cup", "visibility": "visible", "box": [0.70, 0.34, 0.86, 0.73]},
+      {"id": "ball", "class": "ball", "visibility": "visible", "box": [0.48, 0.64, 0.54, 0.73]}
+    ]},
+    {"timestamp_s": 9.0, "entities": [
+      {"id": "gray-cup", "class": "cup", "visibility": "visible", "box": [0.14, 0.34, 0.28, 0.73]},
+      {"id": "mint-cup", "class": "cup", "visibility": "visible", "box": [0.42, 0.34, 0.58, 0.73]},
+      {"id": "pink-cup", "class": "cup", "visibility": "visible", "box": [0.70, 0.34, 0.86, 0.73]}
+    ]},
+    {"timestamp_s": 17.0, "entities": [
+      {"id": "pink-cup", "class": "cup", "visibility": "visible", "box": [0.14, 0.34, 0.28, 0.73]},
+      {"id": "gray-cup", "class": "cup", "visibility": "visible", "box": [0.42, 0.34, 0.58, 0.73]},
+      {"id": "mint-cup", "class": "cup", "visibility": "visible", "box": [0.70, 0.34, 0.86, 0.73]}
+    ]}
+  ]
+}

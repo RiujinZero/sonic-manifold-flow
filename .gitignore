@@ -1,0 +1,17 @@
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+.venv/
+build/
+dist/
+data/
+artifacts/
+checkpoints/
+runs/
+YOLOX_outputs/
+.env
+deploy/**/.env
+deploy/**/*.crt
+/logs/

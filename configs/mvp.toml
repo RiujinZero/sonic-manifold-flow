@@ -1,0 +1,124 @@
+[project]
+seed = 17
+datasets = ["FashionMNIST", "CIFAR10"]
+latent_widths = [64, 128]
+basin_counts = [1000, 10000]
+
+[flow]
+candidate_count = 64
+top_k = 4
+time = 0.5
+temperature = 0.1
+rate_min = 0.0001
+rate_max = 32.0
+
+[learning]
+mode = "statistical"
+freeze_encoder = true
+freeze_output = true
+novelty_persistence = 3
+novelty_distance_quantile = 0.95
+novelty_support_radius = 0.5
+novelty_max_pending = 256
+novelty_max_age = 1024
+max_basins = 10000
+
+[training]
+epochs = 20
+batch_size = 256
+learning_rate = 0.001
+weight_decay = 0.0001
+num_workers = 2
+
+[baselines]
+knn_k = 5
+knn_query_chunk_size = 512
+knn_reference_chunk_size = 8192
+linear_probe_epochs = 50
+linear_probe_batch_size = 512
+linear_probe_learning_rate = 0.01
+neighborhood_k = 10
+neighborhood_samples = 512
+
+[initialization]
+mini_batch_size = 512
+mini_batch_steps = 100
+refinement_steps = 5
+query_chunk_size = 1024
+center_chunk_size = 4096
+target_median_rate = 4.0
+variance_epsilon = 0.0001
+bias_bound = 10.0
+
+[decoder_calibration]
+epochs = 5
+batch_size = 256
+learning_rate = 0.0005
+weight_decay = 0.0001
+num_workers = 2
+flow_time = 0.25
+latent_noise_std = 0.02
+normalized_weight = 0.5
+flowed_weight = 0.5
+
+[flow_ablation]
+batch_size = 256
+num_workers = 2
+times = [0.05, 0.1, 0.15, 0.2, 0.25, 0.5, 1.0]
+image_noise_std = 0.2
+max_samples = 2000
+
+[matched_baselines]
+batch_size = 256
+num_workers = 2
+flow_times = [0.05, 0.1]
+strengths = [0.05, 0.1, 0.2, 0.4, 1.0]
+rbf_top_k = 4
+rbf_temperature = 0.1
+image_noise_std = 0.2
+max_samples = 2000
+conditional_confidence_threshold = 0.8
+conditional_distance_quantile = 0.9
+conditional_flow_time = 0.1
+diagnostic_rbf_strength = 0.2
+gate_calibration_chunk_size = 512
+gate_calibration_samples = 10000
+semantic_confidence_thresholds = [0.7, 0.8, 0.9]
+semantic_distance_quantiles = [0.85, 0.9, 0.95]
+semantic_margin_thresholds = [0.2, 0.4, 0.6]
+
+[neutral_calibration]
+epochs = 5
+batch_size = 256
+learning_rate = 0.0005
+weight_decay = 0.0001
+num_workers = 2
+latent_noise_std = 0.02
+flow_times = [0.05, 0.1]
+prototype_strengths = [0.1, 0.2]
+normalized_weight = 0.5
+transformed_weight = 0.5
+
+[routing]
+initial_index = "exact"
+target_ann_top1_recall = 0.95
+delta_index = "exact"
+
+[continual]
+classes_per_task = 2
+stream_samples_per_class = 200
+shift_scale = 0.25
+latent_noise_std = 0.02
+novelty_support_multiplier = 1.5
+basin_growth_budget = 250
+
+[storage]
+active_compute_dtype = "float32"
+cold_target_dtype = "int8"
+bank_device = "cpu"
+
+[gates]
+active_bank_working_set_bytes = 1000000
+peak_accelerator_memory_bytes = 2000000000
+bank_lookup_rerank_flow_p95_ms = 10.0
+end_to_end_p95_ms = 50.0

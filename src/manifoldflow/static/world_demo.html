@@ -1,0 +1,244 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>ManifoldFlow World Persistent State</title>
+  <style>
+    :root { color-scheme: dark; --bg:#071018; --panel:#101d29; --ink:#eef6ff; --muted:#9eb1c4; --accent:#55e6bd; --recall:#c792f9; --chat:#6fa8ff; --warn:#f5a623; --line:#263b4d; }
+    * { box-sizing:border-box } body { margin:0; font:15px/1.45 system-ui,sans-serif; background:radial-gradient(circle at 20% 0,#173147,var(--bg) 45%); color:var(--ink) }
+    header,main { width:min(1180px,94vw); margin:auto } header { padding:34px 0 22px } h1 { margin:0; font-size:clamp(28px,5vw,54px); letter-spacing:-.04em } header p { color:var(--muted); max-width:760px }
+    .badge { display:inline-block; color:var(--accent); border:1px solid #2e8c77; border-radius:99px; padding:5px 10px; font-size:12px }
+    main { display:flex; flex-direction:column; gap:18px; padding-bottom:50px }
+    .top-row { display:grid; grid-template-columns:minmax(260px,.9fr) minmax(0,1.3fr); gap:18px }
+    .panel { background:color-mix(in srgb,var(--panel) 92%,transparent); border:1px solid var(--line); border-radius:16px; padding:16px; box-shadow:0 16px 50px #0005 }
+    canvas { width:100%; aspect-ratio:16/9; background:#d8c5a2; border-radius:11px; display:block }
+    /* Kept in normal flow (not display:none) so browsers keep decoding
+       frames from the live camera stream; some engines stop decoding a
+       fully hidden <video> even while its MediaStream is active. */
+    .offscreen { position:fixed; top:0; left:-9999px; width:1px; height:1px; opacity:0; pointer-events:none }
+    button,input,select { background:#14283a; color:var(--ink); border:1px solid #34516a; border-radius:9px; padding:10px 12px }
+    button { cursor:pointer } button:hover { border-color:var(--accent) } .controls { display:flex; flex-wrap:wrap; gap:8px; margin:12px 0 }
+    .timeline { height:160px; overflow:auto; color:var(--muted); font-family:ui-monospace,monospace; font-size:12px }
+    .state-log { display:flex; flex-direction:column; gap:6px; max-height:220px; overflow:auto; margin-bottom:14px }
+    .state-row { display:flex; align-items:center; gap:8px; padding:7px 10px; border-radius:8px; background:#172838; border-left:3px solid var(--accent); font-size:13px }
+    .state-row.occluded { opacity:.55; border-left-color:#5a6f82 }
+    .state-row .state-dot { width:9px; height:9px; border-radius:50%; flex:none }
+    .state-row .state-label { font-weight:600 }
+    .state-row .state-detail { color:var(--muted); font-size:12px }
+    .state-empty { color:var(--muted); font-size:13px; padding:4px 2px }
+    #messages { min-height:220px; max-height:460px; overflow:auto } .message { padding:10px; margin:8px 0; border-radius:10px; background:#172838 } .assistant { border-left:3px solid var(--accent) }
+    .assistant.recalled { border-left-color:var(--recall) } .recall-badge { display:inline-block; color:var(--recall); border:1px solid #7a4fc4; border-radius:99px; padding:1px 8px; font-size:11px; margin-right:6px; vertical-align:1px }
+    .assistant.visual { border-left-color:var(--accent) } .visual-badge { display:inline-block; color:var(--accent); border:1px solid #2e8c77; border-radius:99px; padding:1px 8px; font-size:11px; margin-right:6px; vertical-align:1px }
+    .assistant.chat { border-left-color:var(--chat) } .chat-badge { display:inline-block; color:var(--chat); border:1px solid #3567b0; border-radius:99px; padding:1px 8px; font-size:11px; margin-right:6px; vertical-align:1px }
+    .legend { display:flex; flex-direction:column; gap:4px; font-size:12px; color:var(--muted); margin:8px 0 14px }
+    .recall-note { font-size:12px; color:var(--muted); border-left:2px solid var(--recall); padding:2px 0 2px 10px; margin:0 0 14px }
+    .recall-note strong { color:var(--ink) }
+    .legend-item { display:flex; align-items:center; gap:6px }
+    .dot { display:inline-block; width:9px; height:9px; border-radius:50%; flex:none }
+    .recall-dot { background:var(--recall) } .visual-dot { background:var(--accent) } .chat-dot { background:var(--chat) }
+    form { display:flex; gap:8px } form input { flex:1 } small,.muted { color:var(--muted) } .privacy { font-size:12px; border-top:1px solid var(--line); padding-top:12px; margin-top:12px }
+    .scenario-hint { font-size:13px; color:var(--muted); border-top:1px solid var(--line); padding-top:12px; margin-top:12px; display:flex; flex-direction:column; gap:8px }
+    .scenario-hint strong { color:var(--ink) }
+    .caveat { display:flex; gap:8px; align-items:flex-start; background:#2a2008; border:1px solid #a8791f; color:#f5c765; border-radius:10px; padding:10px 12px; font-size:13px; margin:12px 0 }
+    .faq-link { color:var(--accent); font-size:13px; text-decoration:none; border-bottom:1px dotted #2e8c77 }
+    .faq-link:hover { border-bottom-style:solid }
+    .faq summary { cursor:pointer; font-size:20px; font-weight:700; padding:2px 0 }
+    .faq summary:hover { color:var(--accent) }
+    .faq-body { margin-top:14px; display:flex; flex-direction:column; gap:16px }
+    .faq-body h4 { margin:0 0 4px; color:var(--accent); font-size:14px }
+    .faq-body p { margin:0; color:var(--ink); line-height:1.5 }
+    .faq-body p+p { margin-top:6px }
+    .arch-diagram { width:100%; max-width:620px; height:auto; display:block; margin:14px auto 0 }
+    .arch-box { fill:#101d29; stroke:var(--line); stroke-width:1.5 }
+    .arch-box.visual { stroke:var(--accent) }
+    .arch-box.chat { stroke:var(--chat) }
+    .arch-box.core { stroke:var(--ink); stroke-opacity:.4; stroke-width:2 }
+    .arch-title { font:600 14px/1.3 system-ui,sans-serif; fill:var(--ink) }
+    .arch-sub { font:11px/1.4 system-ui,sans-serif; fill:var(--muted) }
+    .arch-arrow { fill:none; stroke-width:2 }
+    .arch-arrow.visual { stroke:var(--accent) }
+    .arch-arrow.chat { stroke:var(--chat) }
+    .arch-arrow.core { stroke:var(--muted) }
+    .modal-overlay { position:fixed; inset:0; background:#00050ac0; display:flex; align-items:center; justify-content:center; z-index:50; padding:20px }
+    .modal-overlay[hidden] { display:none }
+    .modal-box { background:var(--panel); border:1px solid var(--warn); border-radius:14px; padding:22px; max-width:440px; box-shadow:0 20px 60px #000a }
+    .modal-box h3 { margin:0 0 10px; color:var(--warn) }
+    .modal-box p { color:var(--ink); line-height:1.5 }
+    .modal-box button { margin-top:14px; background:var(--warn); color:#241800; font-weight:600; border:none }
+    .modal-box.offline { border-color:var(--accent) }
+    .modal-box.offline h3 { color:var(--accent) }
+    .offline-windows { list-style:none; margin:14px 0; padding:0; display:flex; flex-direction:column; gap:8px }
+    .offline-windows li { background:#0d1a26; border:1px solid var(--line); border-radius:9px; padding:8px 12px; font-weight:600; color:var(--ink); text-align:center }
+    @media(max-width:800px){ .top-row{grid-template-columns:1fr} }
+  </style>
+</head>
+<body>
+<header><span class="badge">Research prototype · transient sessions</span> <a class="faq-link" href="#faq">Jump to FAQ ↓</a><h1>A small model that remembers what it sees. (Prototype Demo)</h1><p>YOLOX detects, SigLIP2 encodes identity, ManifoldFlow stores persistent object basins, and Gemma reads retrieved state through continuous latent tokens.</p><div class="caveat">⚠️ <span><strong>Research prototype, not a validated perception system.</strong> The scripted scenarios below (car/box, cup/ball) are pre-recorded and always render correctly — they demonstrate the persistent state mechanism, not live detection. Live camera mode is a different story: the underlying detector was trained on a narrow, mostly-synthetic dataset and frequently misses or misclassifies real objects, including the trained toy car and box themselves. Treat every live-camera answer as a demo of the persistence mechanism working (or not) on top of imperfect, sometimes-wrong perception — not as evidence of general-purpose object recognition. Improved generalization is a future research direction.</span></div></header>
+<main>
+  <div class="top-row">
+    <section class="panel">
+      <div id="status" class="muted">Starting private session…</div>
+      <h3>Persistent state <small class="muted">— what ManifoldFlow currently remembers about the current state.</small></h3>
+      <div id="stateLog" class="state-log"><div class="state-empty">No entities remembered yet.</div></div>
+      <h3>Observed visual events</h3><div id="timeline" class="timeline"></div>
+      <div class="privacy">Camera access is opt-in. Frames are resized, processed in memory, and are not retained. No microphone is requested. Sessions expire after ten minutes.</div>
+    </section>
+    <section class="panel">
+      <canvas id="stage" width="960" height="540"></canvas>
+      <video id="camera" autoplay muted playsinline class="offscreen"></video>
+      <div class="controls">
+        <select id="scenario"></select><button id="prev">Previous Frame</button><button id="next">Next Frame</button><button id="play">Play</button><button id="live">Try live camera</button><button id="erase">End & erase</button>
+      </div>
+      <div class="scenario-hint">
+        <div><strong>Object permanence</strong> — a toy car drives behind a box and is fully hidden for several frames. Ask “Where is the car?” while it's hidden.</div>
+        <div><strong>Persistent relationships</strong> — a ball starts under a cup, then the cups get shuffled around. Ask “Which cup contains the ball?” after the shuffle.</div>
+      </div>
+    </section>
+  </div>
+  <section class="panel"><h2>Ask Gemma about the world</h2><div class="legend"><span class="legend-item"><span class="dot visual-dot"></span>visual — answered from what the camera has seen</span><span class="legend-item"><span class="dot recall-dot"></span>recalled — answered from something you said earlier this session</span><span class="legend-item"><span class="dot chat-dot"></span>chat — general conversation, not grounded in either persistent state</span></div><p class="recall-note">A “recalled” badge means something was retrieved — check the <strong>Retrieved evidence</strong> panel below to see what it was. Gemma can still misstate or misinterpret that evidence; this path needs more training, so treat a recalled answer as a lead worth checking, not a verified fact.</p><div id="messages"><div class="message assistant">Try “Where is the car?” or “Which cup contains the ball?”</div></div><form id="chat"><input id="question" maxlength="500" aria-label="Question"><button>Ask</button></form><h3>Retrieved evidence</h3><div id="evidence" class="muted">No query yet.</div></section>
+  <details id="faq" class="panel faq">
+    <summary>Frequently asked questions</summary>
+    <div class="faq-body">
+      <div>
+        <h4>How do I use the controls?</h4>
+        <p>The dropdown picks between the two pre-recorded scenarios. <strong>Previous Frame</strong>/<strong>Next Frame</strong> step through one frame at a time; <strong>Play</strong> advances automatically. <strong>Try live camera</strong> switches to your own webcam with real-time (and much less reliable — see below) detection. <strong>End &amp; erase</strong> closes the session and deletes everything it remembers about it.</p>
+        <p>The <strong>Ask Gemma about the world</strong> box takes any question — about what's currently on screen, or about something you told it earlier in the same session — and answers using whichever mechanism actually has evidence, shown by the colored badge on the reply (see the legend above the chat).</p>
+      </div>
+      <div>
+        <h4>How are sessions isolated?</h4>
+        <p>Every time this page loads, your browser requests a brand-new, cryptographically random session ID from the server — nothing is saved between visits, and no two tabs or visitors ever share one. All persistent state for a session (basin memory and anything you've told Gemma) lives only under that ID on the server, walled off from every other session.</p>
+        <p>A session auto-expires after ten minutes of inactivity, and closing the tab or clicking <strong>End &amp; erase</strong> deletes it immediately. Nothing here is meant to persist beyond a single sitting.</p>
+      </div>
+      <div>
+        <h4>What is this demo actually showing?</h4>
+        <p>Most small language models can only answer from what's in their current context — ask about something no longer visible or no longer in the conversation, and they either say they don't know or make something up. This demo pairs a small model (Gemma 3, 270M parameters) with ManifoldFlow, which stores what it has seen or been told as a persistent state outside the model's own context, and injects the relevant piece back in as a vector when it's needed — not by replaying old text into the prompt.</p>
+        <p>That's what the "visible" vs. "occluded" state actually demonstrates: ask where the car is while it's hidden behind the box, and the answer is grounded in what the system remembers happened, not in anything the current frame could show.</p>
+      </div>
+      <div>
+        <h4>Is this a world model?</h4>
+        <p>Not yet. What's here today is the underpinnings: a persistent state that can accept multimodal writes and be read back by a model as retrieved evidence — the mechanism this demo exists to show off, not a full world model built on top of it.</p>
+        <p>The next research directions are (1) a model natively trained on that multimodal persistent state, rather than a frozen model reading it via retrieval, and (2) a predictive system in the style of JEPA that forecasts forward using the latents already stored in ManifoldFlow, instead of only answering questions about the past. Temporal data — how state evolves and is predicted over time — is only partially solved today and needs further research.</p>
+      </div>
+      <div>
+        <h4>Why YOLOX, SigLIP2, and Gemma-3-270M?</h4>
+        <p>These are used off-the-shelf to rapidly prove that ManifoldFlow's persistent state can be used by a language model. A future research direction will use our own custom architectures.</p>
+      </div>
+      <div>
+        <h4>What are the two pre-recorded scenarios?</h4>
+        <p><strong>Object permanence</strong> (car/box): a toy car drives behind a box, is fully hidden for several frames, then reappears on the other side. Ask "Where is the car?" while it's hidden and a system with no persistent state would have nothing to go on.</p>
+        <p><strong>Persistent relationships</strong> (cup/ball): a ball starts under a cup, then all three cups get shuffled around the table. Ask "Which cup contains the ball?" after the shuffle — the ball is never visible again once covered, so the only way to answer correctly is to have tracked the cup, not the ball.</p>
+        <p>Both are real rendered frames from the synthetic training corpus (not hand-drawn placeholders), and always play back identically — they exist to show the mechanism working under controlled conditions, not to prove general-purpose perception.</p>
+      </div>
+      <div>
+        <h4>What are the limitations?</h4>
+        <p>This is a research prototype, not a production system. The object detector (live camera mode only) was trained on a narrow, mostly-synthetic dataset and frequently misses or misclassifies real objects, including its own trained classes. Conversational recall was trained on a specific style of fact-tracking question and doesn't yet generalize to arbitrary phrasing or topics — and even when it retrieves the right evidence, Gemma can still misstate or misinterpret it; this needs more training, not just more prompting. Check the <strong>Retrieved evidence</strong> panel under the chat to see what was actually pulled back before trusting what Gemma did with it. General chat runs through the same small, fine-tuned model, so it can still get ordinary trivia wrong. None of this is hidden — the badges and the banner above are there so you can tell which answers are backed by evidence and which aren't.</p>
+      </div>
+      <div>
+        <h4>How does this fit together?</h4>
+        <p>Two write paths feed one persistent state, which a frozen Gemma reads back from — not by replaying old text, but by taking the retrieved evidence in as latent tokens. ManifoldFlow operates continuously at 5 Hz, tracking state whether or not anyone is asking about it; Gemma is event-driven, only reading that state back in response to a user query.</p>
+        <svg class="arch-diagram" viewBox="0 0 640 500" role="img" aria-label="Architecture: camera frames and chat messages both write into ManifoldFlow's persistent state, which Gemma 3 reads back as latent tokens to produce a tagged answer.">
+          <defs>
+            <marker id="archArrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+              <path d="M0,0L10,5L0,10Z" fill="context-stroke"/>
+            </marker>
+          </defs>
+          <rect class="arch-box visual" x="30" y="10" width="280" height="50" rx="10"/>
+          <text class="arch-title" x="170" y="40" text-anchor="middle">Camera / recorded frames</text>
+          <rect class="arch-box chat" x="330" y="10" width="280" height="50" rx="10"/>
+          <text class="arch-title" x="470" y="40" text-anchor="middle">User chat message</text>
+          <path class="arch-arrow visual" d="M170,60 L170,90" marker-end="url(#archArrow)"/>
+          <path class="arch-arrow chat" d="M470,60 L470,90" marker-end="url(#archArrow)"/>
+          <rect class="arch-box visual" x="30" y="90" width="280" height="76" rx="10"/>
+          <text class="arch-title" x="170" y="116" text-anchor="middle">YOLOX + SigLIP2</text>
+          <text class="arch-sub" x="170" y="134" text-anchor="middle">detects boxes &amp; classes,</text>
+          <text class="arch-sub" x="170" y="150" text-anchor="middle">assigns a stable identity key</text>
+          <rect class="arch-box chat" x="330" y="90" width="280" height="76" rx="10"/>
+          <text class="arch-title" x="470" y="116" text-anchor="middle">Fact extraction</text>
+          <text class="arch-sub" x="470" y="134" text-anchor="middle">flags facts worth</text>
+          <text class="arch-sub" x="470" y="150" text-anchor="middle">remembering later</text>
+          <path class="arch-arrow visual" d="M170,166 L170,196" marker-end="url(#archArrow)"/>
+          <path class="arch-arrow chat" d="M470,166 L470,196" marker-end="url(#archArrow)"/>
+          <rect class="arch-box core" x="30" y="196" width="580" height="90" rx="10"/>
+          <text class="arch-title" x="320" y="224" text-anchor="middle">ManifoldFlow persistent state</text>
+          <text class="arch-sub" x="320" y="244" text-anchor="middle">basin memory — per-entity zone,</text>
+          <text class="arch-sub" x="320" y="260" text-anchor="middle">visibility &amp; relations, plus remembered chat facts</text>
+          <path class="arch-arrow core" d="M320,286 L320,316" marker-end="url(#archArrow)"/>
+          <rect class="arch-box core" x="120" y="316" width="400" height="76" rx="10"/>
+          <text class="arch-title" x="320" y="342" text-anchor="middle">Gemma 3 · 270M (frozen)</text>
+          <text class="arch-sub" x="320" y="360" text-anchor="middle">reads retrieved state as continuous</text>
+          <text class="arch-sub" x="320" y="376" text-anchor="middle">latent tokens — not replayed text</text>
+          <path class="arch-arrow core" d="M320,392 L320,422" marker-end="url(#archArrow)"/>
+          <rect class="arch-box core" x="120" y="422" width="400" height="60" rx="10"/>
+          <text class="arch-title" x="320" y="448" text-anchor="middle">Answer</text>
+          <text class="arch-sub" x="320" y="468" text-anchor="middle">tagged visual / recalled / chat</text>
+        </svg>
+      </div>
+    </div>
+  </details>
+</main>
+<div id="caveatModal" class="modal-overlay" hidden role="dialog" aria-modal="true" aria-labelledby="caveatTitle">
+  <div class="modal-box">
+    <h3 id="caveatTitle">Before you start the live camera</h3>
+    <p>The object detector behind live mode was trained on a narrow, mostly-synthetic dataset (red/blue/yellow cups and a white ball; a toy car and cardboard box). It is <strong>not reliable</strong> on real objects, including those exact trained classes — expect missed detections and misclassifications. Live mode exists to show the persistence mechanism working on top of imperfect perception, not to demonstrate general object recognition. For a clean, always-correct demonstration, use the scripted scenarios (Previous/Next/Play) instead.</p>
+    <button id="caveatAck">I understand</button>
+  </div>
+</div>
+<div id="offlineModal" class="modal-overlay" hidden role="dialog" aria-modal="true" aria-labelledby="offlineTitle">
+  <div class="modal-box offline">
+    <h3 id="offlineTitle">The demo is offline right now</h3>
+    <p>This is a live research prototype running on one machine, so it's only online for a few short windows a day (Eastern time). Please come back during one of these:</p>
+    <ul id="offlineWindows" class="offline-windows"></ul>
+    <p>This page will pick up automatically once a window opens — no need to refresh.</p>
+    <p>We're sorry for any inconvenience. We hope to bring you more updates and demos soon as resources allow.</p>
+  </div>
+</div>
+<script>
+let session='', frame=0, state=null, timer=null, socket=null, stream=null, liveRaf=null;
+const $=id=>document.getElementById(id), canvas=$('stage'), ctx=canvas.getContext('2d'), colors={toy_car:'#ff725e',occluder_box:'#725f4a',cup:'#4eb8ff',ball:'#f9df5b'};
+const sendCanvas=document.createElement('canvas'), sendCtx=(sendCanvas.width=640,sendCanvas.height=480,sendCanvas.getContext('2d'));
+async function api(url,options){const r=await fetch(url,options); if(!r.ok)throw new Error((await r.json()).detail||r.statusText); return r.json()}
+async function init(){const s=await api('/api/session',{method:'POST'});session=s.session_id;$('live').disabled=!s.live_available;const scenes=await api('/api/scenarios');$('scenario').innerHTML=scenes.map(x=>`<option value="${x.id}">${x.title}</option>`).join('');await loadFrame(0);$('status').textContent='Session active. World state is isolated to this browser.'}
+async function loadFrame(value){stopLive();frame=value;state=await api(`/api/scenarios/${$('scenario').value}/frames/${frame}?session_id=${encodeURIComponent(session)}`);frame=state.frame;draw(false);renderStateLog(state);$('timeline').innerHTML=state.events.map(x=>`frame ${x.frame}: ${x.type} · ${x.entity}${x.related?' → '+x.related:''}`).join('<br>')||'No events yet.'}
+function renderStateLog(s){const el=$('stateLog');const items=(s&&s.entities)||[];if(!items.length){el.innerHTML='<div class="state-empty">No entities remembered yet.</div>';return}const labelById={};for(const e of items)labelById[e.id]=e.label||e.class;const relBySubject={};for(const r of((s&&s.relations)||[]))if(r.active)(relBySubject[r.subject]=relBySubject[r.subject]||[]).push(r);el.innerHTML=items.map(e=>{const occluded=e.visibility!=='visible';const rels=(relBySubject[e.id]||[]).map(r=>` · ${r.relation} ${labelById[r.target]||r.target}`).join('');return `<div class="state-row${occluded?' occluded':''}"><span class="state-dot" style="background:${colors[e.class]||'#fff'}"></span><span class="state-label">${e.label||e.class}</span><span class="state-detail">${e.zone||'?'} zone · ${e.visibility}${rels}</span></div>`}).join('')}
+const imageCache=new Map();
+function drawSceneImage(url){
+  if(!url){ctx.fillStyle='#d8c5a2';ctx.fillRect(0,0,canvas.width,canvas.height);return}
+  let img=imageCache.get(url);
+  if(!img){img=new Image();img.src=url;imageCache.set(url,img)}
+  if(img.complete&&img.naturalWidth){ctx.drawImage(img,0,0,canvas.width,canvas.height)}
+  else{ctx.fillStyle='#d8c5a2';ctx.fillRect(0,0,canvas.width,canvas.height);img.onload=()=>{if(state&&state.image===url)draw(false)}}
+}
+function draw(overVideo,list){if(!overVideo){drawSceneImage(state&&state.image)} const items=list||(state&&state.entities); if(!items)return;for(const e of items){const [x1,y1,x2,y2]=e.box,w=(x2-x1)*canvas.width,h=(y2-y1)*canvas.height;ctx.globalAlpha=e.visibility==='visible'?1:.38;ctx.strokeStyle=colors[e.class]||'#fff';ctx.lineWidth=4;ctx.strokeRect(x1*canvas.width,y1*canvas.height,w,h);ctx.fillStyle='#071018';ctx.fillRect(x1*canvas.width,(y1*canvas.height)-25,Math.max(120,w),24);ctx.fillStyle='#fff';ctx.font='14px system-ui';ctx.fillText(`${e.label||e.class} · ${e.id??e.tracker_id} · ${e.visibility}`,x1*canvas.width+5,y1*canvas.height-8)}ctx.globalAlpha=1}
+function stopLive(){if(socket){socket.close();socket=null}if(stream){stream.getTracks().forEach(t=>t.stop());stream=null}if(liveRaf){cancelAnimationFrame(liveRaf);liveRaf=null}}
+function renderLiveFrame(video){ctx.drawImage(video,0,0,canvas.width,canvas.height);draw(true,state&&state.observations);liveRaf=requestAnimationFrame(()=>renderLiveFrame(video))}
+async function startLive(){stopLive();stream=await navigator.mediaDevices.getUserMedia({video:{width:640,height:480},audio:false});const video=$('camera');video.srcObject=stream;await video.play();socket=new WebSocket(`${location.protocol==='https:'?'wss':'ws'}://${location.host}/api/live/${session}`);socket.binaryType='arraybuffer';socket.onmessage=e=>{state=JSON.parse(e.data); if(state.error){$('status').textContent=state.error;stopLive();return} renderStateLog(state);$('timeline').innerHTML=(state.events||[]).map(x=>`frame ${x.frame}: ${x.type} · ${x.entity}`).join('<br>')};socket.onopen=()=>{renderLiveFrame(video);const send=()=>{if(!socket||socket.readyState!==1)return;sendCtx.drawImage(video,0,0,640,480);sendCanvas.toBlob(async blob=>{if(blob)socket.send(await blob.arrayBuffer())},'image/jpeg',.72);setTimeout(send,200)};send()};$('status').textContent='Live camera active · frames are not retained.'}
+let caveatAcknowledged=false;
+function tryStartLive(){startLive().catch(e=>$('status').textContent=e.message)}
+$('prev').onclick=()=>loadFrame(Math.max(0,frame-1));$('next').onclick=()=>loadFrame(frame+1);$('scenario').onchange=()=>loadFrame(0);$('play').onclick=()=>{if(timer){clearInterval(timer);timer=null;$('play').textContent='Play'}else{timer=setInterval(()=>loadFrame(frame+1),650);$('play').textContent='Pause'}};
+$('live').onclick=()=>{if(caveatAcknowledged){tryStartLive();return}$('caveatModal').hidden=false};
+$('caveatAck').onclick=()=>{caveatAcknowledged=true;$('caveatModal').hidden=true;tryStartLive()};
+function scrollMessagesToEnd(){const m=$('messages');m.scrollTop=m.scrollHeight}
+const VISUAL_MODES=new Set(['gemma','gemma-ranked','evidence']);
+const MODE_BADGE={recalled:{cls:'recall-badge',text:'recalled'},visual:{cls:'visual-badge',text:'visual'},chat:{cls:'chat-badge',text:'chat'}};
+$('chat').onsubmit=async e=>{e.preventDefault();const q=$('question').value.trim();if(!q)return;$('messages').innerHTML+=`<div class="message">${q.replaceAll('<','&lt;')}</div>`;scrollMessagesToEnd();try{const a=await api('/api/chat',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({session_id:session,question:q})});const recalled=a.mode==='conversation-recall';const visual=VISUAL_MODES.has(a.mode);const isChat=a.mode==='chat';const kind=recalled?'recalled':(visual?'visual':(isChat?'chat':null));const info=kind&&MODE_BADGE[kind];const badge=info?`<span class="${info.cls}">${info.text}</span>`:'';const cssClass=kind?` ${kind}`:'';$('messages').innerHTML+=`<div class="message assistant${cssClass}">${badge}${a.answer}</div>`;$('evidence').textContent=recalled?'Recalled from something you said earlier in this session.':(a.evidence.join(', ')||'No entity retrieved.')}catch(err){$('messages').innerHTML+=`<div class="message assistant">${err.message}</div>`}$('question').value='';scrollMessagesToEnd()};
+$('erase').onclick=async()=>{stopLive();await api(`/api/session/${session}`,{method:'DELETE'});$('status').textContent='Session persistent state erased.'};window.addEventListener('pagehide',()=>{if(session)navigator.sendBeacon(`/api/session/${session}/erase`)});const openFaq=()=>{if(location.hash==='#faq')$('faq').open=true};window.addEventListener('hashchange',openFaq);openFaq();
+let demoStarted=false;
+async function checkSchedule(){
+  let s;
+  try{s=await(await fetch('/api/status')).json()}catch(e){return}
+  const modal=$('offlineModal');
+  if(s.online){
+    modal.hidden=true;
+    if(!demoStarted){demoStarted=true;init().catch(e=>$('status').textContent=e.message)}
+  }else{
+    stopLive();
+    $('offlineWindows').innerHTML=(s.windows||[]).map(w=>`<li>${w} Eastern</li>`).join('');
+    modal.hidden=false;
+  }
+}
+checkSchedule();
+setInterval(checkSchedule,60000);
+</script>
+</body>
+</html>

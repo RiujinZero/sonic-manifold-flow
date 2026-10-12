@@ -1,0 +1,11 @@
+{
+  "schema_version": 1,
+  "source_archive": "Attachments.zip (local source footage; not committed)",
+  "split_policy": "Video and Video_2 train perception; Video_1 and Video_3 remain whole-clip validation",
+  "clips": [
+    {"video": "Video.mov", "annotations": "Video.annotations.json", "scenario": "mint-cup-ball-shuffle"},
+    {"video": "Video_1.mov", "annotations": "Video_1.annotations.json", "scenario": "pink-cup-ball-shuffle-and-reveal"},
+    {"video": "Video_2.mov", "annotations": "Video_2.annotations.json", "scenario": "different-car-emerges"},
+    {"video": "Video_3.mov", "annotations": "Video_3.annotations.json", "scenario": "same-car-reappears"}
+  ]
+}

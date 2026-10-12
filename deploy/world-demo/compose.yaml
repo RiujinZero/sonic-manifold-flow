@@ -1,0 +1,61 @@
+services:
+  world-demo:
+    build:
+      context: ../..
+      dockerfile: deploy/world-demo/Dockerfile
+    restart: unless-stopped
+    read_only: true
+    tmpfs:
+      - /tmp:size=256m,noexec,nosuid
+    ports:
+      - "127.0.0.1:8000:8000"
+    volumes:
+      - type: bind
+        source: ../../checkpoints/world
+        target: /models
+        read_only: true
+      - type: volume
+        source: hf_cache
+        target: /home/demo/.cache
+      - type: bind
+        source: ../../src/manifoldflow
+        target: /app/src/manifoldflow
+        read_only: true
+      - type: bind
+        source: ../../logs/world-demo
+        target: /app/logs
+    environment:
+      MANIFOLDFLOW_YOLOX_CHECKPOINT: ${MANIFOLDFLOW_YOLOX_CHECKPOINT:-}
+      MANIFOLDFLOW_PROJECTOR_CHECKPOINT: ${MANIFOLDFLOW_PROJECTOR_CHECKPOINT:-}
+      MANIFOLDFLOW_GEMMA_PORT_CHECKPOINT: ${MANIFOLDFLOW_GEMMA_PORT_CHECKPOINT:-}
+      MANIFOLDFLOW_QUERY_CHECKPOINT: ${MANIFOLDFLOW_QUERY_CHECKPOINT:-}
+      MANIFOLDFLOW_GEMMA_RECALL_CHECKPOINT: ${MANIFOLDFLOW_GEMMA_RECALL_CHECKPOINT:-}
+      MANIFOLDFLOW_ANALYTICS_LOG: /app/logs/analytics.jsonl
+      HF_TOKEN: ${HF_TOKEN:-}
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+
+  caddy:
+    image: caddy:2.10-alpine
+    restart: unless-stopped
+    depends_on:
+      - world-demo
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      DEMO_HOSTNAME: ${DEMO_HOSTNAME:-manifoldflow.test}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+
+volumes:
+  caddy_data:
+  caddy_config:
+  hf_cache:

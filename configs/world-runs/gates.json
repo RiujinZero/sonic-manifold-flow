@@ -1,0 +1,38 @@
+{
+  "schema_version": 1,
+  "detector_real_validation": {
+    "map_50_95_min": 0.45,
+    "cup_ap_50_95_min": 0.55,
+    "ball_ap_50_95_min": 0.30,
+    "toy_car": "report_only_due_to_99_source_observations",
+    "box": "not_present_in_real_validation"
+  },
+  "detector_regression": {
+    "max_absolute_ap_50_95_drop_per_supported_synthetic_class": 0.05
+  },
+  "physical_replay": {
+    "observation_precision_min": 0.70,
+    "observation_recall_min": 0.75,
+    "identity_consistency_min": 0.90,
+    "label_switch_rate_max": 0.05
+  },
+  "state_and_events": {
+    "relation_precision_min": 0.75,
+    "relation_recall_min": 0.65,
+    "expected_event_recall_min": 0.70,
+    "ambiguous_evidence_policy": "abstain"
+  },
+  "gemma": {
+    "retrieval_top1_min": 0.95,
+    "ranked_answer_accuracy_min": 0.75,
+    "correct_minus_shuffled_ranked_accuracy_min": 0.40,
+    "disabled_ranked_accuracy_max": 0.15,
+    "free_generation": "diagnostic_only"
+  },
+  "scale": {
+    "cpu_1m_p95_ms_max": 1.0,
+    "resident_gpu_1m_batch_256_speedup_min": 2.0,
+    "required_independent_processes": 3,
+    "semantic_recall": "not_measured_by_this_benchmark"
+  }
+}

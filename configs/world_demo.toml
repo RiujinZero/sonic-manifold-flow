@@ -1,0 +1,39 @@
+[models]
+gemma = "google/gemma-3-270m-it"
+siglip = "google/siglip2-base-patch16-224"
+yolox = "yolox-nano"
+classes = ["toy_car", "occluder_box", "cup", "ball"]
+
+[memory]
+key_dimension = 128
+state_dimension = 256
+reid_threshold = 0.28
+rbf_temperature = 0.15
+top_k = 4
+
+[events]
+confirm_frames = 3
+lost_frames = 10
+movement_threshold = 0.03
+containment_margin = 0.15
+
+[live]
+frame_width = 640
+frame_height = 480
+max_fps = 5
+max_frame_bytes = 1000000
+session_seconds = 600
+max_questions = 30
+concurrent_sessions = 2
+
+[training]
+detector_train_frames = 1000
+oracle_examples = 20000
+validation_examples = 2000
+test_examples = 2000
+retrieval_loss_weight = 0.25
+memory_contrast_weight = 0.10
+lora_rank = 8
+lora_learning_rate = 2e-5
+lora_recall_gate = 0.95
+lora_answer_gate = 0.85

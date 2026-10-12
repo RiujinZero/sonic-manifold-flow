@@ -1,0 +1,57 @@
+{
+  "schema_version": 1,
+  "split": "validation",
+  "video": "Video_3.mov",
+  "scenario": "same-car-reappears",
+  "notes": "The white-and-pink car enters from the right and the same physical car emerges on the left.",
+  "checkpoints": [
+    {
+      "timestamp_s": 2.0,
+      "entities": [
+        {"id": "box", "class": "occluder_box", "label": "orange-shoe-box", "zone": "center", "visibility": "visible", "box": [0.28, 0.27, 0.68, 0.74]},
+        {"id": "white-car", "class": "toy_car", "label": "white-pink-car", "zone": "right", "visibility": "visible", "box": [0.86, 0.52, 1.0, 0.72]}
+      ],
+      "relations": []
+    },
+    {
+      "timestamp_s": 5.0,
+      "entities": [
+        {"id": "box", "class": "occluder_box", "label": "orange-shoe-box", "zone": "center", "visibility": "visible", "box": [0.28, 0.27, 0.68, 0.74]},
+        {"id": "white-car", "class": "toy_car", "label": "white-pink-car", "zone": "right", "visibility": "visible", "box": [0.76, 0.55, 0.91, 0.73]}
+      ],
+      "relations": []
+    },
+    {
+      "timestamp_s": 7.0,
+      "entities": [
+        {"id": "box", "class": "occluder_box", "label": "orange-shoe-box", "zone": "center", "visibility": "visible", "box": [0.28, 0.27, 0.68, 0.74]},
+        {"id": "white-car", "class": "toy_car", "label": "white-pink-car", "zone": "right", "visibility": "occluded"}
+      ],
+      "relations": [{"subject": "white-car", "relation": "occluded_by", "target": "box"}]
+    },
+    {
+      "timestamp_s": 9.0,
+      "entities": [
+        {"id": "box", "class": "occluder_box", "label": "orange-shoe-box", "zone": "center", "visibility": "visible", "box": [0.28, 0.27, 0.68, 0.74]},
+        {"id": "white-car", "class": "toy_car", "label": "white-pink-car", "zone": "right", "visibility": "occluded"}
+      ],
+      "relations": [{"subject": "white-car", "relation": "occluded_by", "target": "box"}]
+    },
+    {
+      "timestamp_s": 11.0,
+      "entities": [
+        {"id": "box", "class": "occluder_box", "label": "orange-shoe-box", "zone": "center", "visibility": "visible", "box": [0.28, 0.27, 0.68, 0.74]},
+        {"id": "white-car", "class": "toy_car", "label": "white-pink-car", "zone": "left", "visibility": "visible", "box": [0.10, 0.59, 0.28, 0.77]}
+      ],
+      "relations": []
+    }
+  ],
+  "expected_events": [
+    {"type": "appeared", "entity": "white-car", "start_s": 1.0, "end_s": 3.0},
+    {"type": "occluded", "entity": "white-car", "related": "box", "start_s": 5.5, "end_s": 8.0},
+    {"type": "reappeared", "entity": "white-car", "start_s": 9.5, "end_s": 11.7}
+  ],
+  "questions": [
+    {"id": "car-final-location", "timestamp_s": 11.2, "question": "Where is the car?", "expected_answers": ["The car is visible in the left zone."]}
+  ]
+}

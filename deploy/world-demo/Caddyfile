@@ -1,0 +1,13 @@
+{$DEMO_HOSTNAME:manifoldflow.test} {
+  tls internal
+  encode zstd gzip
+  reverse_proxy world-demo:8000
+
+  header {
+    Permissions-Policy "camera=(self), microphone=()"
+    Referrer-Policy "no-referrer"
+    X-Content-Type-Options "nosniff"
+    X-Frame-Options "DENY"
+    -Server
+  }
+}

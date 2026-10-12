@@ -1,0 +1,52 @@
+{
+  "schema_version": 1,
+  "recording_defaults": {
+    "resolution": "1920x1080",
+    "fps": 30,
+    "camera": "fixed",
+    "duration_seconds": "20-60",
+    "notes": "Keep untouched originals; annotations are stored separately."
+  },
+  "scenarios": [
+    {
+      "id": "static-inventory",
+      "instruction": "Hold every object still in a clearly separated starting layout."
+    },
+    {
+      "id": "zone-moves",
+      "instruction": "Move each object through left, center, and right, pausing in each zone."
+    },
+    {
+      "id": "car-occlusion",
+      "instruction": "Move the toy car behind the box, pause, then reveal it on the other side."
+    },
+    {
+      "id": "object-return",
+      "instruction": "Remove one object completely, wait, then return it in a new zone."
+    },
+    {
+      "id": "cup-swap",
+      "instruction": "Swap the red, blue, and yellow cups without removing them from view."
+    },
+    {
+      "id": "ball-containment",
+      "instruction": "Cover the ball with each cup in turn and reveal it between trials."
+    },
+    {
+      "id": "partial-occlusion",
+      "instruction": "Move objects while hands and other objects partially block the camera."
+    },
+    {
+      "id": "fast-motion",
+      "instruction": "Move an object quickly across all zones to stress latest-frame replay."
+    },
+    {
+      "id": "lighting-angle",
+      "instruction": "Repeat a short static and movement sequence under changed lighting or angle."
+    },
+    {
+      "id": "mixed-sequence",
+      "instruction": "Combine moves, swaps, containment, disappearance, and reappearance."
+    }
+  ]
+}

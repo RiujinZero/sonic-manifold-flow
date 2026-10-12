@@ -1,0 +1,93 @@
+{
+  "schema_version": 1,
+  "split": "train",
+  "video": "Video_2.mov",
+  "scenario": "different-car-emerges",
+  "notes": "The green monster truck remains behind the box; the white-and-pink car that emerges is a distinct entity.",
+  "checkpoints": [
+    {
+      "timestamp_s": 1.0,
+      "entities": [
+        {"id": "box", "class": "occluder_box", "label": "orange-shoe-box", "zone": "center", "visibility": "visible", "box": [0.28, 0.27, 0.68, 0.74]},
+        {"id": "green-truck", "class": "toy_car", "label": "green-monster-truck", "zone": "right", "visibility": "visible", "box": [0.86, 0.48, 1.0, 0.70]}
+      ],
+      "relations": []
+    },
+    {
+      "timestamp_s": 5.0,
+      "entities": [
+        {"id": "box", "class": "occluder_box", "label": "orange-shoe-box", "zone": "center", "visibility": "visible", "box": [0.28, 0.27, 0.68, 0.74]},
+        {"id": "green-truck", "class": "toy_car", "label": "green-monster-truck", "zone": "right", "visibility": "visible", "box": [0.77, 0.48, 0.92, 0.70]}
+      ],
+      "relations": []
+    },
+    {
+      "timestamp_s": 7.0,
+      "entities": [
+        {"id": "box", "class": "occluder_box", "label": "orange-shoe-box", "zone": "center", "visibility": "visible", "box": [0.28, 0.27, 0.68, 0.74]},
+        {"id": "green-truck", "class": "toy_car", "label": "green-monster-truck", "zone": "right", "visibility": "occluded"}
+      ],
+      "relations": [{"subject": "green-truck", "relation": "occluded_by", "target": "box"}]
+    },
+    {
+      "timestamp_s": 11.0,
+      "entities": [
+        {"id": "box", "class": "occluder_box", "label": "orange-shoe-box", "zone": "center", "visibility": "visible", "box": [0.28, 0.27, 0.68, 0.74]},
+        {"id": "green-truck", "class": "toy_car", "label": "green-monster-truck", "zone": "right", "visibility": "occluded"},
+        {"id": "white-car", "class": "toy_car", "label": "white-pink-car", "zone": "left", "visibility": "visible", "box": [0.10, 0.59, 0.28, 0.77]}
+      ],
+      "relations": [{"subject": "green-truck", "relation": "occluded_by", "target": "box"}]
+    },
+    {
+      "timestamp_s": 14.0,
+      "entities": [
+        {"id": "box", "class": "occluder_box", "label": "orange-shoe-box", "zone": "center", "visibility": "visible", "box": [0.28, 0.27, 0.68, 0.74]},
+        {"id": "green-truck", "class": "toy_car", "label": "green-monster-truck", "zone": "right", "visibility": "occluded"},
+        {"id": "white-car", "class": "toy_car", "label": "white-pink-car", "zone": "left", "visibility": "visible", "box": [0.02, 0.59, 0.18, 0.77]}
+      ],
+      "relations": [{"subject": "green-truck", "relation": "occluded_by", "target": "box"}]
+    }
+  ],
+  "expected_events": [
+    {"type": "appeared", "entity": "green-truck", "start_s": 0.0, "end_s": 1.5},
+    {"type": "occluded", "entity": "green-truck", "related": "box", "start_s": 5.5, "end_s": 8.0},
+    {"type": "appeared", "entity": "white-car", "start_s": 9.5, "end_s": 11.5}
+  ],
+  "questions": [
+    {"id": "original-car-location", "timestamp_s": 12.0, "question": "Where is the original car?", "expected_answers": ["The car is currently hidden behind the box."]}
+  ],
+  "training_frames": [
+    {"timestamp_s": 0.0, "entities": [
+      {"id": "box", "class": "occluder_box", "visibility": "visible", "box": [0.28, 0.27, 0.68, 0.74]},
+      {"id": "green-truck", "class": "toy_car", "visibility": "visible", "box": [0.86, 0.48, 1.0, 0.70]}
+    ]},
+    {"timestamp_s": 2.0, "entities": [
+      {"id": "box", "class": "occluder_box", "visibility": "visible", "box": [0.28, 0.27, 0.68, 0.74]},
+      {"id": "green-truck", "class": "toy_car", "visibility": "visible", "box": [0.86, 0.48, 1.0, 0.70]}
+    ]},
+    {"timestamp_s": 3.0, "entities": [
+      {"id": "box", "class": "occluder_box", "visibility": "visible", "box": [0.28, 0.27, 0.68, 0.74]},
+      {"id": "green-truck", "class": "toy_car", "visibility": "visible", "box": [0.85, 0.48, 0.99, 0.70]}
+    ]},
+    {"timestamp_s": 4.0, "entities": [
+      {"id": "box", "class": "occluder_box", "visibility": "visible", "box": [0.28, 0.27, 0.68, 0.74]},
+      {"id": "green-truck", "class": "toy_car", "visibility": "visible", "box": [0.82, 0.48, 0.97, 0.70]}
+    ]},
+    {"timestamp_s": 5.5, "entities": [
+      {"id": "box", "class": "occluder_box", "visibility": "visible", "box": [0.28, 0.27, 0.68, 0.74]},
+      {"id": "green-truck", "class": "toy_car", "visibility": "visible", "box": [0.70, 0.49, 0.85, 0.70]}
+    ]},
+    {"timestamp_s": 10.0, "entities": [
+      {"id": "box", "class": "occluder_box", "visibility": "visible", "box": [0.28, 0.27, 0.68, 0.74]},
+      {"id": "white-car", "class": "toy_car", "visibility": "visible", "box": [0.11, 0.59, 0.28, 0.77]}
+    ]},
+    {"timestamp_s": 12.0, "entities": [
+      {"id": "box", "class": "occluder_box", "visibility": "visible", "box": [0.28, 0.27, 0.68, 0.74]},
+      {"id": "white-car", "class": "toy_car", "visibility": "visible", "box": [0.08, 0.59, 0.25, 0.77]}
+    ]},
+    {"timestamp_s": 13.0, "entities": [
+      {"id": "box", "class": "occluder_box", "visibility": "visible", "box": [0.28, 0.27, 0.68, 0.74]},
+      {"id": "white-car", "class": "toy_car", "visibility": "visible", "box": [0.04, 0.59, 0.21, 0.77]}
+    ]}
+  ]
+}
